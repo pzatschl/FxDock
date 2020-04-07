@@ -30,8 +30,6 @@ public abstract class FxDockWindow
 	 */
 	public void confirmClosing(OnWindowClosing choice) { }
 	
-	//
-	
 	public final FxAction closeWindowAction = new FxAction(this::actionClose);
 	private final BorderPane frame;
 	private final FxDockRootPane root;

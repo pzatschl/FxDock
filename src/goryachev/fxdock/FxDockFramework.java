@@ -17,8 +17,6 @@ public class FxDockFramework
 		public FxDockPane createPane(String type);
 	}
 	
-	//
-	
 	/** implementation */
 	protected static FrameworkBase base = new FrameworkBase();
 	
@@ -49,9 +47,9 @@ public class FxDockFramework
 	}
 	
 	
-	public static int loadLayout()
+	public static int loadLayout(FxDockWindow window)
 	{
-		return base.loadLayout();
+		return base.loadLayout(window);
 	}
 	
 	

@@ -42,7 +42,7 @@ public class DockDemoApp
 		FxDockFramework.setGenerator(new DemoGenerator());
 		
 		// load saved layout
-		int ct = FxDockFramework.loadLayout();
+		int ct = FxDockFramework.loadLayout(null);
 		if(ct == 0)
 		{
 			// when no saved layout exists, open the first window

@@ -1,9 +1,7 @@
 // Copyright © 2016-2020 Andy Goryachev <andy@goryachev.com>
 package demo.dock;
-import goryachev.common.util.D;
-import goryachev.common.util.GlobalSettings;
-import goryachev.common.util.Hex;
-import goryachev.common.util.SB;
+
+import goryachev.common.util.*;
 import goryachev.fx.FX;
 import goryachev.fx.FxAction;
 import goryachev.fx.FxCheckMenuItem;
@@ -15,7 +13,14 @@ import goryachev.fxdock.FxDockFramework;
 import goryachev.fxdock.FxDockWindow;
 import goryachev.fxdock.WindowListMenuItem;
 import goryachev.fxdock.internal.DockTools;
+
+import java.io.File;
+import java.util.Arrays;
 import java.util.Random;
+
+import goryachev.fxdock.internal.FrameworkBase;
+import goryachev.fxdock.internal.FxDockSchema;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBar;
@@ -29,255 +34,245 @@ import javafx.scene.layout.BorderPane;
  * Demo Window.
  */
 public class DemoWindow
-    extends FxDockWindow
-{
-	public static final FxAction newBrowserAction = new FxAction(DemoWindow::actionNewBrowser);
-	public static final FxAction newCPaneAction = new FxAction(DemoWindow::actionNewCPane);
-	public static final FxAction newHPaneAction = new FxAction(DemoWindow::actionNewHPane);
-	public static final FxAction newVPaneAction = new FxAction(DemoWindow::actionNewVPane);
-	public static final FxAction newLoginAction = new FxAction(DemoWindow::actionNewLogin);
-	public static final FxAction newWindowAction = new FxAction(DemoWindow::actionNewWindow);
-	public static final FxAction quitApplicationAction = new FxAction(FxDockFramework::exit);
-	public static final FxAction saveSettingsAction = new FxAction(DemoWindow::actionSaveSettings);
-	public final FxAction windowCheckAction = new FxAction();
-	public final Label statusField = new Label();
-	private static GlobalBooleanProperty showCloseDialogProperty = new GlobalBooleanProperty("show.close.dialog", true);
+        extends FxDockWindow {
+    public static final FxAction newBrowserAction = new FxAction(DemoWindow::actionNewBrowser);
+    public static final FxAction newCPaneAction = new FxAction(DemoWindow::actionNewCPane);
+    public static final FxAction newHPaneAction = new FxAction(DemoWindow::actionNewHPane);
+    public static final FxAction newVPaneAction = new FxAction(DemoWindow::actionNewVPane);
+    public static final FxAction newLoginAction = new FxAction(DemoWindow::actionNewLogin);
+    public static final FxAction newWindowAction = new FxAction(DemoWindow::actionNewWindow);
+    public static final FxAction quitApplicationAction = new FxAction(FxDockFramework::exit);
+    public static final FxAction saveSettingsAction = new FxAction(DemoWindow::actionSaveSettings);
 
-	
-	public DemoWindow()
-	{
-		setTop(createMenu());
-		setBottom(createStatusBar());
-		setTitle(DockDemoApp.TITLE);
-		
-		bind("CHECKBOX_MENU", windowCheckAction.selectedProperty());
-	}
-	
-	
-	protected FxMenuBar createMenu()
-	{
-		FxMenuBar m = new FxMenuBar();
-		// file
-		m.menu("File");
-		m.item("Save Settings", saveSettingsAction);
-		m.separator();
-		m.item("Close Window", closeWindowAction);
-		m.separator();
-		m.item("Quit Application", quitApplicationAction);
-		// window
-		m.menu("Window");
-		m.item("New Browser", newBrowserAction);
-		m.item("New Demo Window", newWindowAction);
-		m.item("New Login Window", newLoginAction);
-		m.separator();
-		m.item("CPane Example", newCPaneAction);
-		m.item("HPane Example", newHPaneAction);
+    public final FxAction openPerspectiveOne = new FxAction(this::openPerspectiveOne);
+    public final FxAction openPerspectiveTwo = new FxAction(this::openPerspectiveTwo);
+
+    public final FxAction windowCheckAction = new FxAction();
+    public final Label statusField = new Label();
+    private static GlobalBooleanProperty showCloseDialogProperty = new GlobalBooleanProperty("show.close.dialog", true);
+
+
+    public DemoWindow() {
+        setTop(createMenu());
+        setBottom(createStatusBar());
+        setTitle(DockDemoApp.TITLE);
+
+        bind("CHECKBOX_MENU", windowCheckAction.selectedProperty());
+    }
+
+
+    protected FxMenuBar createMenu() {
+        FxMenuBar m = new FxMenuBar();
+        // file
+        m.menu("File");
+        m.item("Save Settings", saveSettingsAction);
+        m.separator();
+        m.item("Close Window", closeWindowAction);
+        m.separator();
+        m.item("Quit Application", quitApplicationAction);
+        // window
+        m.menu("Window");
+        m.item("New Browser", newBrowserAction);
+        m.item("New Demo Window", newWindowAction);
+        m.item("New Login Window", newLoginAction);
+        m.separator();
+        m.item("CPane Example", newCPaneAction);
+        m.item("HPane Example", newHPaneAction);
 //		m.add("VPane Example", newVPaneAction);
-		m.separator();
-		m.add(new FxCheckMenuItem("Confirm Window Closing", showCloseDialogProperty));
-		m.add(new WindowListMenuItem(this, m.lastMenu()));
-		// help
-		m.menu("Help");
-		m.add(new FxCheckMenuItem("Check Box Menu", windowCheckAction));
-		FxMenu m2 = m.menu("Test", new FxAction(() -> D.print("test")));
-		m2.item("T2", new FxAction(() -> D.print("t2")));
-		m.item("T3", new FxAction(() -> D.print("t3")));
-		return m;
-	}
+        m.separator();
+        m.add(new FxCheckMenuItem("Confirm Window Closing", showCloseDialogProperty));
+        m.add(new WindowListMenuItem(this, m.lastMenu()));
+        // help
+        m.menu("Help");
+        m.separator();
+        m.add(new FxCheckMenuItem("Check Box Menu", windowCheckAction));
+        m.menu("Perspektive");
+        m.item("Perspektive 1", openPerspectiveOne);
+        m.item("Perspektive 2", openPerspectiveTwo);
+        m.separator();
+        FxMenu m2 = m.menu("Test", new FxAction(() -> D.print("test")));
+        m2.item("T2", new FxAction(() -> D.print("t2")));
+        m.item("T3", new FxAction(() -> D.print("t3")));
+        return m;
+    }
 
 
-	protected Node createStatusBar()
-	{
-		BorderPane p = new BorderPane();
-		p.setLeft(statusField);
-		p.setRight(FX.label(DockDemoApp.COPYRIGHT, new Insets(1, 20, 1, 10)));
-		return p;
-	}
+    protected Node createStatusBar() {
+        BorderPane p = new BorderPane();
+        p.setLeft(statusField);
+        p.setRight(FX.label(DockDemoApp.COPYRIGHT, new Insets(1, 20, 1, 10)));
+        return p;
+    }
 
-	
-	public static DemoWindow actionNewWindow()
-	{
-		SB sb = new SB();
-		c(sb);
-		c(sb);
-		c(sb);
-		String type = sb.toString();
-			
-		DemoWindow w = new DemoWindow();
-		w.setContent(new DemoPane(type));
-		w.setWidth(300);
-		w.setHeight(200);
-		w.open();
-		return w;
-	}
-	
-	
-	public static DemoWindow actionNewBrowser()
-	{
-		return openBrowser("https://github.com/andy-goryachev/FxDock");
-	}
-	
-	
-	public static DemoWindow actionNewCPane()
-	{
-		DemoWindow w = new DemoWindow();
-		w.setTitle("CPane Demo");
-		w.setContent(new DemoCPane());
-		w.setWidth(1000);
-		w.setHeight(750);
-		w.open();
-		return w;
-	}
-	
-	
-	public static DemoWindow actionNewHPane()
-	{
-		DemoWindow w = new DemoWindow();
-		w.setTitle("HPane Demo");
-		w.setContent(new DemoHPane());
-		w.setWidth(1000);
-		w.setHeight(750);
-		w.open();
-		return w;
-	}
-	
-	
-	public static DemoWindow actionNewVPane()
-	{
-		DemoWindow w = new DemoWindow();
-		w.setTitle("VPane Demo");
+
+    public static DemoWindow actionNewWindow() {
+        SB sb = new SB();
+        c(sb);
+        c(sb);
+        c(sb);
+        String type = sb.toString();
+
+        DemoWindow w = new DemoWindow();
+        w.setContent(new DemoPane(type));
+        w.setWidth(300);
+        w.setHeight(200);
+        w.open();
+        return w;
+    }
+
+
+    public static DemoWindow actionNewBrowser() {
+        return openBrowser("https://github.com/andy-goryachev/FxDock");
+    }
+
+
+    public static DemoWindow actionNewCPane() {
+        DemoWindow w = new DemoWindow();
+        w.setTitle("CPane Demo");
+        w.setContent(new DemoCPane());
+        w.setWidth(1000);
+        w.setHeight(750);
+        w.open();
+        return w;
+    }
+
+
+    public static DemoWindow actionNewHPane() {
+        DemoWindow w = new DemoWindow();
+        w.setTitle("HPane Demo");
+        w.setContent(new DemoHPane());
+        w.setWidth(1000);
+        w.setHeight(750);
+        w.open();
+        return w;
+    }
+
+
+    public static DemoWindow actionNewVPane() {
+        DemoWindow w = new DemoWindow();
+        w.setTitle("VPane Demo");
 //		w.setContent(new DemoVPane());
-		w.setWidth(1000);
-		w.setHeight(750);
-		w.open();
-		return w;
-	}
-	
-	
-	public static DemoWindow actionNewLogin()
-	{
-		DemoWindow w = new DemoWindow();
-		w.setContent(new DemoLoginPane());
-		w.setWidth(400);
-		w.setHeight(300);
-		w.open();
-		return w;
-	}
-	
-	
-	public static DemoWindow openBrowser(String url)
-	{
-		DemoBrowser b = new DemoBrowser();
-		b.openPage(url);
-		
-		DemoWindow w = new DemoWindow();
-		w.setContent(b);
-		w.setWidth(900);
-		w.setHeight(700);
-		w.open();
-		return w;
-	}
-	
-	
-	protected static void c(SB sb)
-	{
-		int min = 100;
-		int v = min + new Random().nextInt(255 - min);
-		sb.append(Hex.toHexByte(v));
-	}
-	
-	
-	protected static void actionSaveSettings()
-	{
-		FxDockFramework.saveLayout();
-		GlobalSettings.save();
-	}
+        w.setWidth(1000);
+        w.setHeight(750);
+        w.open();
+        return w;
+    }
 
 
-	public void storeSettings(String prefix)
-	{
-		super.storeSettings(prefix);
-		
-		String s = DockTools.saveLayout(getContent()).toString();
-		statusField.setText(s);
-	}
-	
-	
-	public void save()
-	{
-		// indicates saving the changes
-		D.print("save");
-	}
+    public static DemoWindow actionNewLogin() {
+        DemoWindow w = new DemoWindow();
+        w.setContent(new DemoLoginPane());
+        w.setWidth(400);
+        w.setHeight(300);
+        w.open();
+        return w;
+    }
 
 
-	// this method illustrates how to handle closing a window,
-	// or closing multiple window when quitting the application.
-	public void confirmClosing(OnWindowClosing ch)
-	{
-		if(!showCloseDialogProperty.get())
-		{
-			return;
-		}
-		
-		if(ch.isSaveAll())
-		{
-			save();
-			return;
-		}
-		else if(ch.isDiscardAll())
-		{
-			return;
-		}
-		
-		toFront();
-		
-		// FIX switch to FxDialog
-		Dialog d = new Dialog();
-		d.initOwner(this);
-		d.setTitle("Save Changes?");
-		d.setContentText("This is an example of a dialog shown when closing a window.");
-		
-		Object save = addButton(d, "Save", ButtonBar.ButtonData.OTHER);
-		Object saveAll = null;
-		if(ch.isClosingMultipleWindows())
-		{
-			saveAll = addButton(d, "Save All", ButtonBar.ButtonData.OTHER);
-		}
-		addButton(d, "Discard", ButtonBar.ButtonData.OTHER);
-		Object discardAll = null;
-		if(ch.isClosingMultipleWindows())
-		{
-			discardAll = addButton(d, "Discard All", ButtonBar.ButtonData.OTHER);
-		}
-		Object cancel = addButton(d, "Cancel", ButtonBar.ButtonData.APPLY);
-		
-		d.showAndWait();
-		Object rv = d.getResult();
+    public static DemoWindow openBrowser(String url) {
+        DemoBrowser b = new DemoBrowser();
+        b.openPage(url);
 
-		if(rv == cancel)
-		{
-			ch.setCancelled();
-		}
-		else if(rv == save)
-		{
-			save();
-		}
-		else if(rv == saveAll)
-		{
-			ch.setSaveAll();
-			save();
-		}
-		else if(rv == discardAll)
-		{
-			ch.setDiscardAll();
-		}
-	}
-	
-	
-	protected static Object addButton(Dialog d, String text, ButtonBar.ButtonData type)
-	{
-		ButtonType b = new ButtonType(text, type);
-		d.getDialogPane().getButtonTypes().add(b);
-		return b;
-	}
+        DemoWindow w = new DemoWindow();
+        w.setContent(b);
+        w.setWidth(900);
+        w.setHeight(700);
+        w.open();
+        return w;
+    }
+
+
+    protected static void c(SB sb) {
+        int min = 100;
+        int v = min + new Random().nextInt(255 - min);
+        sb.append(Hex.toHexByte(v));
+    }
+
+
+    protected static void actionSaveSettings() {
+        FxDockFramework.saveLayout();
+        GlobalSettings.save();
+    }
+
+
+    public void storeSettings(String prefix) {
+        super.storeSettings(prefix);
+        String s = DockTools.saveLayout(getContent()).toString();
+        statusField.setText(s);
+    }
+
+
+    public void save() {
+        // indicates saving the changes
+        D.print("save");
+    }
+
+    protected void openPerspectiveOne() {
+        GlobalSettings.setFileProvider(new File("perspektive1.conf"));
+        FxDockFramework.loadLayout(this);
+        GlobalSettings.setFileProvider(new File("settings.conf"));
+    }
+
+    protected void openPerspectiveTwo() {
+        GlobalSettings.setFileProvider(new File("perspektive2.conf"));
+        FxDockFramework.loadLayout(this);
+        GlobalSettings.setFileProvider(new File("settings.conf"));
+    }
+
+
+    // this method illustrates how to handle closing a window,
+    // or closing multiple window when quitting the application.
+    public void confirmClosing(OnWindowClosing ch) {
+        if (!showCloseDialogProperty.get()) {
+            return;
+        }
+
+        if (ch.isSaveAll()) {
+            save();
+            return;
+        } else if (ch.isDiscardAll()) {
+            return;
+        }
+
+        toFront();
+
+        // FIX switch to FxDialog
+        Dialog d = new Dialog();
+        d.initOwner(this);
+        d.setTitle("Save Changes?");
+        d.setContentText("This is an example of a dialog shown when closing a window.");
+
+        Object save = addButton(d, "Save", ButtonBar.ButtonData.OTHER);
+        Object saveAll = null;
+        if (ch.isClosingMultipleWindows()) {
+            saveAll = addButton(d, "Save All", ButtonBar.ButtonData.OTHER);
+        }
+        addButton(d, "Discard", ButtonBar.ButtonData.OTHER);
+        Object discardAll = null;
+        if (ch.isClosingMultipleWindows()) {
+            discardAll = addButton(d, "Discard All", ButtonBar.ButtonData.OTHER);
+        }
+        Object cancel = addButton(d, "Cancel", ButtonBar.ButtonData.APPLY);
+
+        d.showAndWait();
+        Object rv = d.getResult();
+
+        if (rv == cancel) {
+            ch.setCancelled();
+        } else if (rv == save) {
+            save();
+        } else if (rv == saveAll) {
+            ch.setSaveAll();
+            save();
+        } else if (rv == discardAll) {
+            ch.setDiscardAll();
+        }
+    }
+
+
+    protected static Object addButton(Dialog d, String text, ButtonBar.ButtonData type) {
+        ButtonType b = new ButtonType(text, type);
+        d.getDialogPane().getButtonTypes().add(b);
+        return b;
+    }
 }

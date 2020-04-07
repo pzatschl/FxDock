@@ -55,17 +55,20 @@ public class FrameworkBase
 	}
 	
 	
-	public int loadLayout()
+	public int loadLayout(FxDockWindow window)
 	{
+			if(window==null){
+				window = createWindow();
+			}
 		int ct = FxDockSchema.getWindowCount();
 		// restore in proper z order
 		for(int i=ct-1; i>=0; i--)
 		{
 			try
 			{
-				FxDockWindow w = createWindow();
+				FxDockWindow w = window;
 				String prefix = FxDockSchema.windowID(i);
-				
+
 				FxDockSchema.restoreWindow(prefix, w);
 				registerWindow(w);
 				
